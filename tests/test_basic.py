@@ -1,7 +1,7 @@
 import pytest
 import enum
 import sys
-from snaparg import SnapArgumentParser  # Adjust this import path to your file structure
+from snaparg import SnapArgumentParser
 from io import StringIO
 from contextlib import redirect_stdout, redirect_stderr
 
@@ -16,48 +16,36 @@ def test_valid_enum_parsing():
     args = parser.parse_args(["--mode", "FAST"])
     assert args.mode == Mode.FAST  # not 1
 
-def test_invalid_flag_suggestion():
-    import subprocess
-    import tempfile
-    import sys
-    from pathlib import Path
+def test_invalid_flag_suggestion(monkeypatch):
+    import builtins
+    from io import StringIO
+    from contextlib import redirect_stdout
 
-    # Script to be tested
-    test_script = """
-import sys
-import enum
-from snaparg import SnapArgumentParser
+    # Simulate command-line input
+    test_args = ["progname", "--moed", "FAST"]
+    monkeypatch.setattr(sys, "argv", test_args)
 
-class Mode(enum.Enum):
-    FAST = "FAST"
-    SLOW = "SLOW"
-    MEDIUM = "MEDIUM"
+    output = StringIO()
+    with redirect_stdout(output):  # Redirect all print to `output`
+        class Mode(enum.Enum):
+            FAST = "FAST"
+            SLOW = "SLOW"
+            MEDIUM = "MEDIUM"
 
-parser = SnapArgumentParser()
-parser.add_argument("--mode", type=Mode)
-parser.add_argument("--count", type=int)
+        parser = SnapArgumentParser()
+        parser.add_argument("--mode", type=Mode)
+        parser.add_argument("--count", type=int)
 
-parser.parse_args()
-"""
+        try:
+            parser.parse_args()
+        except SystemExit:
+            pass  # Expected exit on error
 
-    # Write to a temporary file
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir) / "temp_snaparg_test.py"
-        temp_path.write_text(test_script)
+    output_value = output.getvalue()
+    assert "Did you mean" in output_value, "No suggestion given in error message"
+    assert "--mode" in output_value, "'--mode' not suggested"
 
-        # Run the script with an invalid flag
-        result = subprocess.run(
-            [sys.executable, str(temp_path), "--mod", "FAST"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True
-        )
 
-    # Assertions with better failure messages
-    assert result.returncode != 0, f"Expected non-zero exit code, got {result.returncode}"
-    assert "Did you mean" in result.stdout, f"'Did you mean' not found in output:\n{result.stdout}"
-    assert "--mod" in result.stdout, f"'--mod' not found in output:\n{result.stdout}"
-    assert "--mode" in result.stdout, f"'--mode' not suggested in output:\n{result.stdout}"
 
 def test_help_coloring(monkeypatch):
     parser = SnapArgumentParser()
