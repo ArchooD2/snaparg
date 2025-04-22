@@ -23,7 +23,6 @@ class SnapArgumentParser(argparse.ArgumentParser):
         # Auto-Enum support
         arg_type = kwargs.get("type")
         if isinstance(arg_type, type) and issubclass(arg_type, enum.Enum):
-            kwargs["choices"] = list(arg_type)
             # Display friendly enum names in help
             kwargs.setdefault("metavar", "[" + "|".join(e.name for e in arg_type) + "]")
             def parse_enum(s):
@@ -35,7 +34,7 @@ class SnapArgumentParser(argparse.ArgumentParser):
                     return arg_type(s)  # Try value lookup
                 except ValueError:
                     raise argparse.ArgumentTypeError(f"{s!r} is not a valid {arg_type.__name__}")
-            
+
             kwargs.setdefault("type", parse_enum)
 
 
