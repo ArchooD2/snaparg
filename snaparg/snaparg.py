@@ -58,9 +58,10 @@ class SnapArgumentParser(argparse.ArgumentParser):
             for wrong, suggestion in suggestions:
                 print(f"  Did you mean: {RED}{wrong}{RESET} → {BOLD}{GREEN}{suggestion}{RESET}?")
             print("\nFull message:")
-
-
-        super().error(message)
+            print(message)
+            self.exit(2)
+        else:
+            super().error(message)
 
     def format_help(self):
         help_text = super().format_help()
