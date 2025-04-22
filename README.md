@@ -1,3 +1,5 @@
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/ArchooD2/snaparg) ![GitHub contributors](https://img.shields.io/github/contributors-anon/ArchooD2/snaparg) ![GitHub last commit](https://img.shields.io/github/last-commit/ArchooD2/snaparg) ![PyPI - License](https://img.shields.io/pypi/l/snaparg) ![PyPI - Downloads](https://img.shields.io/pypi/dd/snaparg)
+---
 # snaparg
 
 `snaparg` is a lightweight Python library that wraps around the built-in `argparse` module, making command-line interfaces more user-friendly by detecting typos in argument names and suggesting the closest valid alternatives.
