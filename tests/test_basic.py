@@ -16,24 +16,48 @@ def test_valid_enum_parsing():
     args = parser.parse_args(["--mode", "FAST"])
     assert args.mode == Mode.FAST  # not 1
 
-def test_invalid_flag_suggestion(monkeypatch):
-    parser = SnapArgumentParser()
-    parser.add_argument("--mode", type=Mode)
-    parser.add_argument("--count", type=int)
+def test_invalid_flag_suggestion():
+    import subprocess
+    import tempfile
+    import sys
+    from pathlib import Path
 
-    fake_argv = ["script.py", "--mod", "FAST"]
-    monkeypatch.setattr(sys, "argv", fake_argv)
+    # Script to be tested
+    test_script = """
+import sys
+import enum
+from snaparg import SnapArgumentParser
 
-    f = StringIO()
-    with redirect_stdout(f), redirect_stderr(f):
-        with pytest.raises(SystemExit):
-            parser.parse_args()
+class Mode(enum.Enum):
+    FAST = "FAST"
+    SLOW = "SLOW"
+    MEDIUM = "MEDIUM"
 
+parser = SnapArgumentParser()
+parser.add_argument("--mode", type=Mode)
+parser.add_argument("--count", type=int)
 
-    output = f.getvalue()
-    assert "Did you mean" in output
-    assert "--mod" in output
-    assert "--mode" in output
+parser.parse_args()
+"""
+
+    # Write to a temporary file
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir) / "temp_snaparg_test.py"
+        temp_path.write_text(test_script)
+
+        # Run the script with an invalid flag
+        result = subprocess.run(
+            [sys.executable, str(temp_path), "--mod", "FAST"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
+        )
+
+    # Assertions with better failure messages
+    assert result.returncode != 0, f"Expected non-zero exit code, got {result.returncode}"
+    assert "Did you mean" in result.stdout, f"'Did you mean' not found in output:\n{result.stdout}"
+    assert "--mod" in result.stdout, f"'--mod' not found in output:\n{result.stdout}"
+    assert "--mode" in result.stdout, f"'--mode' not suggested in output:\n{result.stdout}"
 
 def test_help_coloring(monkeypatch):
     parser = SnapArgumentParser()
