@@ -19,29 +19,32 @@ def test_valid_enum_parsing():
 def test_invalid_flag_suggestion(monkeypatch):
     import builtins
     from io import StringIO
+    from contextlib import redirect_stdout
 
     # Simulate command-line input
     test_args = ["progname", "--moed", "FAST"]
     monkeypatch.setattr(sys, "argv", test_args)
 
     output = StringIO()
-    monkeypatch.setattr(builtins, "print", lambda *args, **kwargs: print(*args, file=output, **kwargs))
+    with redirect_stdout(output):  # Redirect all print to `output`
+        class Mode(enum.Enum):
+            FAST = "FAST"
+            SLOW = "SLOW"
+            MEDIUM = "MEDIUM"
 
-    class Mode(enum.Enum):
-        FAST = "FAST"
-        SLOW = "SLOW"
-        MEDIUM = "MEDIUM"
+        parser = SnapArgumentParser()
+        parser.add_argument("--mode", type=Mode)
+        parser.add_argument("--count", type=int)
 
-    parser = SnapArgumentParser()
-    parser.add_argument("--mode", type=Mode)
-    parser.add_argument("--count", type=int)
-    parser.parse_args()
+        try:
+            parser.parse_args()
+        except SystemExit:
+            pass  # Expected exit on error
 
-    # Output checks
     output_value = output.getvalue()
     assert "Did you mean" in output_value, "No suggestion given in error message"
-    assert "--mod" in output_value, "'--mod' not found in suggestions"
     assert "--mode" in output_value, "'--mode' not suggested"
+
 
 
 def test_help_coloring(monkeypatch):
