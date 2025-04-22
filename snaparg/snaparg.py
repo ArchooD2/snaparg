@@ -59,9 +59,11 @@ class SnapArgumentParser(argparse.ArgumentParser):
                 print(f"  Did you mean: {RED}{wrong}{RESET} → {BOLD}{GREEN}{suggestion}{RESET}?")
             print("\nFull message:")
             print(message)
-            raise SystemExit
+            self.exit(2)
+
         else:
-            raise SystemExit(message)
+            self.exit(2, f"{self.prog}: error: {message}\n")
+
 
     def format_help(self):
         help_text = super().format_help()
