@@ -24,15 +24,15 @@ class SnapArgumentParser(argparse.ArgumentParser):
         if isinstance(arg_type, type) and issubclass(arg_type, enum.Enum):
             # Pretty name for help output
             kwargs.setdefault("metavar", "[" + "|".join(e.name for e in arg_type) + "]")
-    
+
             def parse_enum(s):
                 try:
                     return arg_type[s]  # ← name lookup only
                 except KeyError:
                     raise argparse.ArgumentTypeError(f"{s!r} is not a valid {arg_type.__name__}")
-    
+
             kwargs.setdefault("type", parse_enum)
-    
+
         return super().add_argument(*args, **kwargs)
 
 
@@ -77,6 +77,7 @@ if __name__ == "__main__":
         FAST = "FAST"
         SLOW = "SLOW"
         MEDIUM = "MEDIUM"
+
 
 
     parser = SnapArgumentParser(description="Demo script with snaparg features.")
