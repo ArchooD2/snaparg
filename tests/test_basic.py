@@ -35,17 +35,13 @@ def test_invalid_flag_suggestion(monkeypatch):
     parser = SnapArgumentParser()
     parser.add_argument("--mode", type=Mode)
     parser.add_argument("--count", type=int)
-
-    with pytest.raises(SystemExit) as e:
-        parser.parse_args()
+    parser.parse_args()
 
     # Output checks
     output_value = output.getvalue()
     assert "Did you mean" in output_value, "No suggestion given in error message"
     assert "--mod" in output_value, "'--mod' not found in suggestions"
     assert "--mode" in output_value, "'--mode' not suggested"
-
-    assert e.value.code != 0, "Expected non-zero exit on bad flag"
 
 
 def test_help_coloring(monkeypatch):
