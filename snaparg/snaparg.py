@@ -53,11 +53,11 @@ class SnapArgumentParser(argparse.ArgumentParser):
             if matches:
                 suggestions.append((input_opt, matches[0]))
 
-            if suggestions:
-                print(f"\n{YELLOW}Error: Unknown or invalid argument(s).{RESET}")
-                for wrong, suggestion in suggestions:
-                    print(f"  Did you mean: {RED}{wrong}{RESET} → {BOLD}{GREEN}{suggestion}{RESET}?")
-                print("\nFull message:")
+        if suggestions:
+            print(f"\n{YELLOW}Error: Unknown or invalid argument(s).{RESET}")
+            for wrong, suggestion in suggestions:
+                print(f"  Did you mean: {RED}{wrong}{RESET} → {BOLD}{GREEN}{suggestion}{RESET}?")
+            print("\nFull message:")
 
 
         super().error(message)
