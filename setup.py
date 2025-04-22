@@ -7,7 +7,7 @@ setup(
     description='A typo-tolerant CLI parser wrapper for argparse',
     author='PJ Hayes',
     author_email='archood2next@gmail.com',
-    license='MIT',
+    license='MPL-2.0',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     classifiers=[
