@@ -52,24 +52,26 @@ class SnapArgumentParser(argparse.ArgumentParser):
                 for wrong, suggestion in suggestions:
                     print(f"  Did you mean: {RED}{wrong}{RESET} → {BOLD}{GREEN}{suggestion}{RESET}?")
                 print("\nFull message:")
-            
+
 
         super().error(message)
 
     def format_help(self):
         help_text = super().format_help()
-        # Optional: Add color to headers
         help_text = help_text.replace("optional arguments:", f"{CYAN}Optional arguments:{RESET}")
+        help_text = help_text.replace("options:", f"{CYAN}Optional arguments:{RESET}")
         help_text = help_text.replace("positional arguments:", f"{CYAN}Positional arguments:{RESET}")
         return help_text
+
 
 
 # Example usage
 if __name__ == "__main__":
     class Mode(enum.Enum):
-        FAST = enum.auto()
-        SLOW = enum.auto()
-        MEDIUM = enum.auto()
+        FAST = "FAST"
+        SLOW = "SLOW"
+        MEDIUM = "MEDIUM"
+
 
     parser = SnapArgumentParser(description="Demo script with snaparg features.")
     parser.add_argument("--mode", type=Mode, help="Choose a processing mode.")
