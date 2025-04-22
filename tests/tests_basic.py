@@ -44,6 +44,5 @@ def test_help_coloring(monkeypatch):
         parser.print_help()
 
     help_output = f.getvalue()
-    assert "Optional arguments:" not in help_output
     assert "\033[96mOptional arguments:\033[0m" in help_output  # ANSI cyan
 
