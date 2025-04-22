@@ -31,7 +31,7 @@ class SnapArgumentParser(argparse.ArgumentParser):
                 except KeyError:
                     raise argparse.ArgumentTypeError(f"{s!r} is not a valid {arg_type.__name__}")
 
-            kwargs.setdefault("type", parse_enum)
+            kwargs["type"] = parse_enum
 
         return super().add_argument(*args, **kwargs)
 
