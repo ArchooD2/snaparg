@@ -15,6 +15,8 @@ GREEN = "\033[92m"
 
 class SnapArgumentParser(argparse.ArgumentParser):
     def __init__(self, *args, **kwargs):
+        if sys.version_info > (3, 11):
+            kwargs.setdefault("exit_on_error", True)
         # Enable raw formatting to preserve color in help output
         kwargs.setdefault("formatter_class", lambda prog: argparse.HelpFormatter(prog, max_help_position=35))
         super().__init__(*args, **kwargs)
@@ -38,7 +40,6 @@ class SnapArgumentParser(argparse.ArgumentParser):
 
     def error(self, message):
         # Grab all valid options
-        raise RuntimeError("ENTERED ERROR HANDLER")
         valid_options = []
         for action in self._actions:
             if action.option_strings:
