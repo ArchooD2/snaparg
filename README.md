@@ -1,8 +1,21 @@
 # snaparg
 
-`snaparg` is a Python library that wraps around `argparse` to make CLI tools more user-friendly by forgiving small typos in argument names and offering helpful suggestions.
+`snaparg` is a lightweight Python library that wraps around the built-in `argparse` module, making command-line interfaces more user-friendly by detecting typos in argument names and suggesting the closest valid alternatives.
 
-## Example
+Perfect for scripts and tools that aim to be a little more forgiving to users without sacrificing the power and flexibility of `argparse`.
+
+---
+
+## ✨ Features
+
+- Drop-in replacement for `argparse.ArgumentParser`
+- Detects mistyped CLI flags and suggests corrections
+- Compatible with existing `argparse`-based code
+- Zero dependencies — works out of the box
+
+---
+
+## 🔧 Example
 
 ```bash
 $ python demo.py --iput file.txt
@@ -13,12 +26,15 @@ Full message:
 usage: demo.py [-h] [--input INPUT] [--output OUTPUT] [--force]
 ```
 
-## Installation
+---
 
-```bash
-pip install snaparg
-```
+## 📦 Installation
 
-## License
+```pip install snaparg```
 
-MPL 2.0 License
+---
+
+## 📄 License
+
+This project is licensed under the Mozilla Public License 2.0 (MPL-2.0).
+See the [LICENSE](LICENSE) file for details.
