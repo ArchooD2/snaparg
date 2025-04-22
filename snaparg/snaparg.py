@@ -38,6 +38,7 @@ class SnapArgumentParser(argparse.ArgumentParser):
 
     def error(self, message):
         # Grab all valid options
+        raise RuntimeError("ENTERED ERROR HANDLER")
         valid_options = []
         for action in self._actions:
             if action.option_strings:

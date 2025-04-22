@@ -52,6 +52,10 @@ parser.parse_args()
             stderr=subprocess.STDOUT,
             text=True
         )
+    print("=== STDOUT ===")
+    print(result.stdout)
+    print("=== RETURN CODE ===")
+    print(result.returncode)
 
     # Assertions with better failure messages
     assert result.returncode != 0, f"Expected non-zero exit code, got {result.returncode}"
