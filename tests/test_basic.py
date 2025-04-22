@@ -22,7 +22,7 @@ def test_invalid_flag_suggestion(monkeypatch):
     from contextlib import redirect_stdout
 
     # Simulate command-line input
-    test_args = ["progname", "--moed", "FAST"]
+    test_args = ["progname", "--mod", "FAST"]
     monkeypatch.setattr(sys, "argv", test_args)
 
     output = StringIO()
