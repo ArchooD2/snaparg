@@ -18,19 +18,17 @@ class SnapArgumentParser(argparse.ArgumentParser):
     def __init__(self, *args, **kwargs):
         if sys.version_info > (3, 11):
             kwargs.setdefault("exit_on_error", True)
-        # Use functools.partial to keep formatter_class recognizable
         kwargs.setdefault("formatter_class", partial(argparse.HelpFormatter, max_help_position=35))
         super().__init__(*args, **kwargs)
 
     def add_argument(self, *args, **kwargs):
         arg_type = kwargs.get("type")
         if isinstance(arg_type, type) and issubclass(arg_type, enum.Enum):
-            # Pretty name for help output
             kwargs.setdefault("metavar", "[" + "|".join(e.name for e in arg_type) + "]")
 
             def parse_enum(s):
                 try:
-                    return arg_type[s]  # ← name lookup only
+                    return arg_type[s]
                 except KeyError:
                     raise argparse.ArgumentTypeError(f"{s!r} is not a valid {arg_type.__name__}")
 
@@ -38,17 +36,25 @@ class SnapArgumentParser(argparse.ArgumentParser):
 
         return super().add_argument(*args, **kwargs)
 
+    def _autofix_arguments(self, suggestions, raw_args):
+        fixed_args = []
+        for arg in raw_args:
+            for wrong, right in suggestions:
+                if arg == wrong:
+                    fixed_args.append(right)
+                    break
+            else:
+                fixed_args.append(arg)
+        return fixed_args
+
     def error(self, message):
-        # Grab all valid options
         valid_options = []
         for action in self._actions:
             if action.option_strings:
                 valid_options.extend(action.option_strings)
 
-        # Grab all argv args that look like options (start with -)
         input_options = [arg for arg in sys.argv[1:] if arg.startswith('-')]
 
-        # Check for close matches
         suggestions = []
         for input_opt in input_options:
             matches = difflib.get_close_matches(input_opt, valid_options, n=3, cutoff=0.4)
@@ -56,13 +62,19 @@ class SnapArgumentParser(argparse.ArgumentParser):
                 suggestions.append((input_opt, matches[0]))
 
         if suggestions:
+            if '--autofix' in sys.argv:
+                print(f"{CYAN}Auto-fix enabled. Correcting and re-parsing...{RESET}")
+                fixed_args = self._autofix_arguments(suggestions, sys.argv[1:])
+                sys.argv = [sys.argv[0]] + fixed_args
+                self.parse_args()
+                return
+
             print(f"\n{YELLOW}Error: Unknown or invalid argument(s).{RESET}")
             for wrong, suggestion in suggestions:
                 print(f"  Did you mean: {RED}{wrong}{RESET} → {BOLD}{GREEN}{suggestion}{RESET}?")
             print("\nFull message:")
             print(message)
             self.exit(2)
-
         else:
             self.exit(2, f"{self.prog}: error: {message}\n")
 
@@ -84,4 +96,5 @@ if __name__ == "__main__":
     parser = SnapArgumentParser(description="Demo script with snaparg features.")
     parser.add_argument("--mode", type=Mode, help="Choose a processing mode.")
     parser.add_argument("--count", type=int, help="Number of things to process.")
+    parser.add_argument("--autofix", action="store_true", help="Automatically fix mistyped arguments.")
     args = parser.parse_args()
