@@ -26,7 +26,7 @@ class SnapArgumentParser(argparse.ArgumentParser):
             kwargs["choices"] = list(arg_type)
             # Display friendly enum names in help
             kwargs.setdefault("metavar", "[" + "|".join(e.name for e in arg_type) + "]")
-            kwargs.setdefault("type", lambda s: arg_type[s])  # parse using name
+            kwargs.setdefault("type", lambda s: arg_type[s] if s in arg_type.__members__ else arg_type(s))  # parse using name
 
         return super().add_argument(*args, **kwargs)
 
