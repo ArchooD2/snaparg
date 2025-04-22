@@ -51,7 +51,7 @@ class SnapArgumentParser(argparse.ArgumentParser):
         # Check for close matches
         suggestions = []
         for input_opt in input_options:
-            matches = difflib.get_close_matches(input_opt, valid_options, n=1, cutoff=0.6)
+            matches = difflib.get_close_matches(input_opt, valid_options, n=3, cutoff=0.4)
             if matches:
                 suggestions.append((input_opt, matches[0]))
 
