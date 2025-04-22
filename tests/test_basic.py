@@ -25,9 +25,10 @@ def test_invalid_flag_suggestion(monkeypatch):
     monkeypatch.setattr(sys, "argv", fake_argv)
 
     f = StringIO()
-    with pytest.raises(SystemExit):
-        with redirect_stdout(f), redirect_stderr(f):
+    with redirect_stdout(f), redirect_stderr(f):
+        with pytest.raises(SystemExit):
             parser.parse_args()
+
 
     output = f.getvalue()
     assert "Did you mean" in output
