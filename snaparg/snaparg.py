@@ -36,6 +36,17 @@ class SnapArgumentParser(argparse.ArgumentParser):
 
         return super().add_argument(*args, **kwargs)
 
+
+    def _autofix_arguments(self, suggestions, raw_args):
+        fixed_args = []
+        for arg in raw_args:
+            for wrong, right in suggestions:
+                if arg == wrong:
+                    fixed_args.append(right)
+                    break
+            else:
+                fixed_args.append(arg)
+        return fixed_args
     def parse_args(self, args=None, namespace=None):
         parsed_args = super().parse_args(args, namespace)
         # Check for missing required arguments
