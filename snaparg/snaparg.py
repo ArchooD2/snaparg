@@ -83,17 +83,13 @@ class SnapArgumentParser(argparse.ArgumentParser):
                 self.parse_args()
                 return
     
-            print(f"\n{YELLOW}Error: Unknown or invalid argument(s).{RESET}")
             for wrong, suggestion in suggestions:
-                print(f"  {RED}{wrong}{RESET} → {BOLD}{GREEN}{suggestion}{RESET}")
-            print(f"\n{BOLD}Full message:{RESET}\n{message}")
-            print(f"\n{BOLD}Tip:{RESET} Run with {GREEN}--help{RESET} for correct usage.")
-            self.exit(2)
-    
-        # Default argparse fallback
-        print(f"\n{RED}Error:{RESET} {message}")
-        print(f"\n{BOLD}Tip:{RESET} Run with {GREEN}--help{RESET} for usage.")
-        self.exit(2)
+                print(f"  Did you mean: {RED}{wrong}{RESET} → {BOLD}{GREEN}{suggestion}{RESET}?")
+
+                # Default argparse fallback
+                print(f"\n{RED}Error:{RESET} {message}")
+                print(f"\n{BOLD}Tip:{RESET} Run with {GREEN}--help{RESET} for usage.")
+                self.exit(2)
 
 
     def format_help(self):
