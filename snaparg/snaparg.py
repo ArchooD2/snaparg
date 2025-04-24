@@ -36,45 +36,59 @@ class SnapArgumentParser(argparse.ArgumentParser):
 
         return super().add_argument(*args, **kwargs)
 
-    def _autofix_arguments(self, suggestions, raw_args):
-        fixed_args = []
-        for arg in raw_args:
-            for wrong, right in suggestions:
-                if arg == wrong:
-                    fixed_args.append(right)
-                    break
-            else:
-                fixed_args.append(arg)
-        return fixed_args
+    def parse_args(self, args=None, namespace=None):
+        parsed_args = super().parse_args(args, namespace)
+        # Check for missing required arguments
+        missing = []
+        for action in self._actions:
+            if getattr(action, 'required', False):
+                value = getattr(parsed_args, action.dest, None)
+                if value is None:
+                    missing.append(action.option_strings[0])
+        if missing:
+            self.error(f"the following arguments are required: {', '.join(missing)}")
+        return parsed_args
 
     def error(self, message):
         valid_options = []
         for action in self._actions:
             if action.option_strings:
                 valid_options.extend(action.option_strings)
-    
+
         input_options = [arg for arg in sys.argv[1:] if arg.startswith('-')]
-    
+
         suggestions = []
         for input_opt in input_options:
             matches = difflib.get_close_matches(input_opt, valid_options, n=3, cutoff=0.4)
             if matches:
                 suggestions.append((input_opt, matches[0]))
-    
-        # 🟡 Case: Missing a value after a valid argument
+
+        # 🔴 Missing required args (now handled here)
+        if "the following arguments are required:" in message:
+            print(f"\n{RED}Error:{RESET} {message}")
+            print(f"{YELLOW}These arguments are mandatory.{RESET}")
+
+            print(f"\n{BOLD}Hints:{RESET}")
+            for action in self._actions:
+                if getattr(action, 'required', False):
+                    flags = ', '.join(action.option_strings)
+                    print(f"  {GREEN}{flags}{RESET}: {action.help}")
+            self.exit(2)
+
+
+        # 🟡 Missing value after a valid flag
         if "expected one argument" in message:
             for action in self._actions:
                 if action.option_strings:
                     for opt in action.option_strings:
                         if opt in sys.argv:
-                            # Type hint (default to str if not set)
                             type_hint = action.type.__name__ if hasattr(action.type, '__name__') else "str"
                             print(f"\n{YELLOW}Error:{RESET} {opt} expects a value of type {BOLD}{CYAN}{type_hint}{RESET}.")
                             print(f"💡 Try: {opt}=value  or  {opt} value")
                             print(f"\n{BOLD}Tip:{RESET} Run with {GREEN}--help{RESET} for usage examples.")
                             self.exit(2)
-    
-        # 🔴 Case: Mistyped flags
+
+        # 🔴 Mistyped flags
         if suggestions:
             if '--autofix' in sys.argv:
                 print(f"{CYAN}Auto-fix enabled. Correcting and re-parsing...{RESET}")
@@ -82,14 +96,12 @@ class SnapArgumentParser(argparse.ArgumentParser):
                 sys.argv = [sys.argv[0]] + fixed_args
                 self.parse_args()
                 return
-    
+
             for wrong, suggestion in suggestions:
                 print(f"  Did you mean: {RED}{wrong}{RESET} → {BOLD}{GREEN}{suggestion}{RESET}?")
-
-                # Default argparse fallback
-                print(f"\n{RED}Error:{RESET} {message}")
-                print(f"\n{BOLD}Tip:{RESET} Run with {GREEN}--help{RESET} for usage.")
-                self.exit(2)
+            print(f"\n{RED}Error:{RESET} {message}")
+            print(f"\n{BOLD}Tip:{RESET} Run with {GREEN}--help{RESET} for usage.")
+            self.exit(2)
 
 
     def format_help(self):
