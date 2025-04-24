@@ -52,15 +52,29 @@ class SnapArgumentParser(argparse.ArgumentParser):
         for action in self._actions:
             if action.option_strings:
                 valid_options.extend(action.option_strings)
-
+    
         input_options = [arg for arg in sys.argv[1:] if arg.startswith('-')]
-
+    
         suggestions = []
         for input_opt in input_options:
             matches = difflib.get_close_matches(input_opt, valid_options, n=3, cutoff=0.4)
             if matches:
                 suggestions.append((input_opt, matches[0]))
-
+    
+        # 🟡 Case: Missing a value after a valid argument
+        if "expected one argument" in message:
+            for action in self._actions:
+                if action.option_strings:
+                    for opt in action.option_strings:
+                        if opt in sys.argv:
+                            # Type hint (default to str if not set)
+                            type_hint = action.type.__name__ if hasattr(action.type, '__name__') else "str"
+                            print(f"\n{YELLOW}Error:{RESET} {opt} expects a value of type {BOLD}{CYAN}{type_hint}{RESET}.")
+                            print(f"💡 Try: {opt}=value  or  {opt} value")
+                            print(f"\n{BOLD}Tip:{RESET} Run with {GREEN}--help{RESET} for usage examples.")
+                            self.exit(2)
+    
+        # 🔴 Case: Mistyped flags
         if suggestions:
             if '--autofix' in sys.argv:
                 print(f"{CYAN}Auto-fix enabled. Correcting and re-parsing...{RESET}")
@@ -68,15 +82,19 @@ class SnapArgumentParser(argparse.ArgumentParser):
                 sys.argv = [sys.argv[0]] + fixed_args
                 self.parse_args()
                 return
-
+    
             print(f"\n{YELLOW}Error: Unknown or invalid argument(s).{RESET}")
             for wrong, suggestion in suggestions:
-                print(f"  Did you mean: {RED}{wrong}{RESET} → {BOLD}{GREEN}{suggestion}{RESET}?")
-            print("\nFull message:")
-            print(message)
+                print(f"  {RED}{wrong}{RESET} → {BOLD}{GREEN}{suggestion}{RESET}")
+            print(f"\n{BOLD}Full message:{RESET}\n{message}")
+            print(f"\n{BOLD}Tip:{RESET} Run with {GREEN}--help{RESET} for correct usage.")
             self.exit(2)
-        else:
-            self.exit(2, f"{self.prog}: error: {message}\n")
+    
+        # Default argparse fallback
+        print(f"\n{RED}Error:{RESET} {message}")
+        print(f"\n{BOLD}Tip:{RESET} Run with {GREEN}--help{RESET} for usage.")
+        self.exit(2)
+
 
     def format_help(self):
         help_text = super().format_help()
