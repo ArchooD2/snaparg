@@ -5,16 +5,19 @@ from snaparg import SnapArgumentParser
 from io import StringIO
 from contextlib import redirect_stdout, redirect_stderr
 
+
 class Mode(enum.Enum):
     FAST = enum.auto()
     SLOW = enum.auto()
     MEDIUM = enum.auto()
+
 
 def test_valid_enum_parsing():
     parser = SnapArgumentParser()
     parser.add_argument("--mode", type=Mode)
     args = parser.parse_args(["--mode", "FAST"])
     assert args.mode == Mode.FAST  # not 1
+
 
 def test_invalid_flag_suggestion(monkeypatch):
     import builtins
@@ -27,6 +30,7 @@ def test_invalid_flag_suggestion(monkeypatch):
 
     output = StringIO()
     with redirect_stdout(output):  # Redirect all print to `output`
+
         class Mode(enum.Enum):
             FAST = "FAST"
             SLOW = "SLOW"
@@ -46,7 +50,6 @@ def test_invalid_flag_suggestion(monkeypatch):
     assert "--mode" in output_value, "'--mode' not suggested"
 
 
-
 def test_help_coloring(monkeypatch):
     parser = SnapArgumentParser()
     parser.add_argument("--mode", type=Mode)
@@ -58,4 +61,3 @@ def test_help_coloring(monkeypatch):
 
     help_output = f.getvalue()
     assert "\033[96mOptional arguments:\033[0m" in help_output  # ANSI cyan
-
