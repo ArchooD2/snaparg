@@ -39,7 +39,7 @@ Thank you for your interest in contributing to snaparg! Whether you're reporting
    ```bash
    pytest
    ```
-   (“We use `pytest` because it’s lightweight and familiar to most Python devs.”)
+   (We use `pytest` because it’s lightweight and familiar to most Python devs.)
 
 5. **Commit and Push**
    ```bash
