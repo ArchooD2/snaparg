@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="snaparg",
-    version="0.1.2",
+    name='snaparg',
+    version='0.2.0',
     packages=find_packages(),
     description="A typo-tolerant CLI parser wrapper for argparse",
     author="PJ Hayes",
