@@ -1,0 +1,29 @@
+import sys
+from .snaparg import SnapArgumentParser
+
+def interactive_parse(parser: SnapArgumentParser):
+    try:
+        return parser.parse_args()
+    except SystemExit:
+        # Find required args not in sys.argv
+        missing_args = [
+            action for action in parser._actions
+            if action.required and f'--{action.dest}' not in sys.argv
+        ]
+
+        for action in missing_args:
+            prompt = f"Enter value for --{action.dest}"
+            if action.help:
+                prompt += f" ({action.help})"
+            prompt += ": "
+
+            while True:
+                value = input(prompt)
+                try:
+                    value = action.type(value) if action.type else value
+                    sys.argv.extend([f"--{action.dest}", str(value)])
+                    break
+                except Exception as e:
+                    print(f"Invalid value: {e}")
+
+        return parser.parse_args()

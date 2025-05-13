@@ -16,6 +16,7 @@ You can even replace it in any script just by editing your `import` statement!
 - Detects mistyped CLI flags and suggests corrections
 - Compatible with existing `argparse`-based code
 - Zero dependencies — works out of the box
+- Includes Interactive Mode which prompts for missing arguments to prevent immediate script failure and guide users smoothly.
 
 ---
 
