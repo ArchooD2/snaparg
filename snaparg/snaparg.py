@@ -40,6 +40,10 @@ class SnapArgumentParser(argparse.ArgumentParser):
 
         return super().add_argument(*args, **kwargs)
 
+    def get_registered_actions(self):
+        return [a for a in self._actions if a.option_strings]
+
+
     def _autofix_arguments(self, suggestions, raw_args):
         fixed_args = []
         for arg in raw_args:
@@ -55,7 +59,7 @@ class SnapArgumentParser(argparse.ArgumentParser):
         parsed_args = super().parse_args(args, namespace)
         # Check for missing required arguments
         missing = []
-        for action in self._actions:
+        for action in self.get_registered_actions():
             if getattr(action, "required", False):
                 value = getattr(parsed_args, action.dest, None)
                 if value is None:
@@ -66,7 +70,7 @@ class SnapArgumentParser(argparse.ArgumentParser):
 
     def error(self, message):
         valid_options = []
-        for action in self._actions:
+        for action in self.get_registered_actions():
             if action.option_strings:
                 valid_options.extend(action.option_strings)
 
@@ -82,7 +86,7 @@ class SnapArgumentParser(argparse.ArgumentParser):
 
         # 🟡 Case: Missing a value after a valid argument
         if "expected one argument" in message:
-            for action in self._actions:
+            for action in self.get_registered_actions():
                 if action.option_strings:
                     for opt in action.option_strings:
                         if opt in sys.argv:
