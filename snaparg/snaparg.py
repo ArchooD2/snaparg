@@ -16,6 +16,11 @@ GREEN = "\033[92m"
 
 class SnapArgumentParser(argparse.ArgumentParser):
     def __init__(self, *args, **kwargs):
+        """
+        Initializes the SnapArgumentParser with enhanced defaults.
+        
+        Sets a custom help formatter with increased help position width and, for Python 3.12+, enables exit on error by default.
+        """
         if sys.version_info > (3, 11):
             kwargs.setdefault("exit_on_error", True)
         kwargs.setdefault(
@@ -24,6 +29,11 @@ class SnapArgumentParser(argparse.ArgumentParser):
         super().__init__(*args, **kwargs)
 
     def add_argument(self, *args, **kwargs):
+        """
+        Adds a command-line argument, with enhanced support for enum types.
+        
+        If the argument type is an enum.Enum subclass, sets the metavar to display valid enum member names and ensures input values are parsed as enum members, raising an error for invalid values.
+        """
         arg_type = kwargs.get("type")
         if isinstance(arg_type, type) and issubclass(arg_type, enum.Enum):
             kwargs.setdefault("metavar", "[" + "|".join(e.name for e in arg_type) + "]")
@@ -41,10 +51,25 @@ class SnapArgumentParser(argparse.ArgumentParser):
         return super().add_argument(*args, **kwargs)
 
     def get_registered_actions(self):
+        """
+        Returns a list of argument actions that have associated option strings.
+        
+        Only actions representing options (i.e., those with flags like '--foo') are included.
+        """
         return [a for a in self._actions if a.option_strings]
 
 
     def _autofix_arguments(self, suggestions, raw_args):
+        """
+        Replaces mistyped arguments in the input list with their suggested corrections.
+        
+        Args:
+            suggestions: A list of (wrong, right) argument string pairs indicating corrections.
+            raw_args: The original list of command-line argument strings.
+        
+        Returns:
+            A new list of arguments with mistyped entries replaced by their suggested corrections.
+        """
         fixed_args = []
         for arg in raw_args:
             for wrong, right in suggestions:
@@ -56,6 +81,11 @@ class SnapArgumentParser(argparse.ArgumentParser):
         return fixed_args
 
     def parse_args(self, args=None, namespace=None):
+        """
+        Parses command-line arguments and checks for missing required options.
+        
+        If any required option arguments are missing after parsing, raises an error listing them.
+        """
         parsed_args = super().parse_args(args, namespace)
         # Check for missing required arguments
         missing = []
@@ -69,6 +99,11 @@ class SnapArgumentParser(argparse.ArgumentParser):
         return parsed_args
 
     def error(self, message):
+        """
+        Handles command-line parsing errors with enhanced, colorized messages and suggestions.
+        
+        If a required argument value is missing, displays the expected type and usage tips. For mistyped flags, suggests corrections or automatically fixes them if '--autofix' is present, then exits the program.
+        """
         valid_options = []
         for action in self.get_registered_actions():
             if action.option_strings:

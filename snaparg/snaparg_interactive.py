@@ -3,9 +3,9 @@ from .snaparg import SnapArgumentParser
 
 def interactive_parse(parser: SnapArgumentParser):
     """
-    Parses command-line arguments, interactively prompting for missing required arguments.
+    Parses command-line arguments, interactively prompting for any missing required values.
     
-    If required arguments are missing, prompts the user to enter values for them, validates the input, and then returns the fully parsed arguments.
+    If required arguments are missing from the command line, prompts the user to input them, validates and converts the input as needed, and returns the parsed arguments.
     """
     try:
         return parser.parse_args()
