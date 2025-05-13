@@ -13,11 +13,17 @@ def interactive_parse(parser: SnapArgumentParser):
         # Find required args not in sys.argv
         missing_args = [
             action for action in parser._actions
-            if action.required and f'--{action.dest}' not in sys.argv
+            if action.required and (
+                (action.option_strings and f'--{action.dest}' not in sys.argv) or
+                (not action.option_strings and action.dest not in sys.argv)
+            )
         ]
 
         for action in missing_args:
-            prompt = f"Enter value for --{action.dest}"
+            if action.option_strings:
+                prompt = f"Enter value for --{action.dest}"
+            else:
+                prompt = f"Enter value for {action.dest}"
             if action.help:
                 prompt += f" ({action.help})"
             prompt += ": "
